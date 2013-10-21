@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Pragma" content="no-cache">
+  <title>JS file server</title>
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+</head>
+
+<body>
+  <div class="container" style="max-width: none !important;">
+    <div id="header">
+      <h1>JS file server</h1>
+    </div>
+    <div class="row">
+      <div class="col-lg-3" id="sidebar">
+        <ul class="nav nav-pills nav-stacked well">
+        <li>
+        Menu
+        </li>
+        <li class="active" id="Home_nav">
+        <a href="#/">/</a>
+        </li>
+        </ul>
+      </div>
+      <div class="col-lg-9" id="main">
+        <div class="panel panel-default">
+          <div id="panel_heading" class="panel-heading"></div>
+          <div id="panel_body" class="panel-body">
+            filename, filesize, last modifiedをクリックするとソートされます．<br>
+            ディレクトリをクリックすると移動します．<br>
+            ファイルをクリックするとダウンロードします．
+          </div>
+          <table id="table" class="table table-hover">
+            <tr id="head"><th></th>
+              <th id="filename">
+                <span class="glyphicon glyphicon-sort-by-alphabet"></span>
+                filename
+              </th>
+              <th id="filesize">
+                <span class="glyphicon glyphicon-sort-by-attributes"></span>
+                filesize
+              </th>
+              <th id="last_modified" id="pull-right">
+                <span class="glyphicon glyphicon-sort-by-attributes"></span>
+                last modified
+              </th>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <div id="footer">
+      JS file server
+      <a href="http://github.com/miettal/JS-file-server/">http://github.com/miettal/JS-file-server/</a>
+    </div>
+  </div>
+
+  <script src="//code.jquery.com/jquery.min.js"></script>
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+  <script src="js/jquery.ba-hashchange.min.js"></script>  
+  <script src="js/moment.min.js"></script>
+  <script src="config.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
+
