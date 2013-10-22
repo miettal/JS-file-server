@@ -26,7 +26,7 @@ function rewrite_table(){
       return true;
     }
 
-    var tr = $("<tr>");
+    var tr = $("<tr>").css("cursor","pointer");
     if(file.filename == '..'){
       tr.click(function(){
         if(dir.split('/').slice(-1) !== ''){
