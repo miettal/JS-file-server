@@ -3,7 +3,6 @@ var files = [];
 var directories = [];
 var sort_by = "filename";
 var sort_inverse = false;
-location.hash = '#/';
 
 function unixtime2str(unixtime)
 {
@@ -24,11 +23,11 @@ function filesize2str(filesize)
   var str = filesize;
 
   if(filesize >= 1024*1024*1024){
-    str = filesize/1024/1024/1024+'G';
+    str += ' '+(filesize/1024/1024/1024).toFixed(2)+'G';
   }else if(filesize >= 1024*1024){
-    str = filesize/1024/1024/1024+'M';
+    str += ' '+(filesize/1024/1024).toFixed(2)+'M';
   }else if(filesize >= 1024){
-    str = filesize/1024/1024/1024+'k';
+    str += ' '+(filesize/1024).toFixed(2)+'k';
   }
   
   return str;
@@ -123,6 +122,9 @@ $("#last_modified").click(function(){
 });
 
 $(window).hashchange(function() {
+  if(location.hash == '' || location.hash == '#'){
+    location.hash = '#/';
+  }
   dir = location.hash.slice(1);
   $.getJSON(
     'ls.php?callback=?',
