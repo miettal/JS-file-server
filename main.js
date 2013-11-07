@@ -5,6 +5,24 @@ var sort_by = "filename";
 var sort_inverse = false;
 location.hash = '#/';
 
+function delete_button(filepath)
+{
+  return $('<button type="button" class="btn btn-xs btn-default">delete</button>').click(function(){
+    var fd = new FormData();
+    fd.append("filepath", filepath);
+    $.ajax({
+      url: "del.php",
+      type: "POST",
+      data: fd,
+      processData: false,
+      contentType: false,
+      success: function(data, dataType){
+        fetch();
+      },
+    });
+  });
+}
+
 function unixtime2str(unixtime)
 {
   var time = moment.unix(unixtime);
@@ -21,14 +39,16 @@ function unixtime2str(unixtime)
 
 function filesize2str(filesize)
 {
-  var str = filesize;
+  var str;
 
   if(filesize >= 1024*1024*1024){
-    str = filesize/1024/1024/1024+'G';
+    str = filesize/1024/1024/1024+'GB';
   }else if(filesize >= 1024*1024){
-    str = filesize/1024/1024/1024+'M';
+    str = filesize/1024/1024/1024+'MB';
   }else if(filesize >= 1024){
-    str = filesize/1024/1024/1024+'k';
+    str = filesize/1024/1024/1024+'kB';
+  }else{
+    str = filesize+'B';
   }
   
   return str;
@@ -61,7 +81,6 @@ function rewrite_table(){
       return true;
     }
     if(file.filename == '..' && dir === '/'){
-
       return true;
     }
 
@@ -83,9 +102,43 @@ function rewrite_table(){
     tr.append($("<td>").append(a));
     tr.append($("<td>").text("-"));
     tr.append($("<td>").text(unixtime2str(file.last_modified)));
+    if(file.filename != '..'){
+      tr.append($("<td>").append(delete_button(dir+file.filename)));
+    }else{
+      tr.append($("<td>").text("-"));
+    }
 
     $("#table").append(tr);
   });
+
+  // New directory
+  var tr = $("<tr>");
+  tr.append($("<td>").append('<span class="glyphicon glyphicon-folder-close"></span>'));
+  tr.append($("<td>").append($('<div class="input-group">'
+    +'  <input id="dirname" type="text" class="form-control" placeholder="directory name">'
+    +'  <span class="input-group-btn">'
+    +'    <button id="mkdir" class="btn btn-default" type="button">make directory</button>'
+    +'  </span>'
+    +'</div>')));
+  tr.append($("<td>").text("-"));
+  tr.append($("<td>").text("-"));
+  tr.append($("<td>").text("-"));
+  $('#mkdir').click(function(){
+    var fd = new FormData();
+    fd.append("filepath", dir+$("#dirname"));
+    $.ajax({
+      url: "mkdir.php",
+      type: "POST",
+      data: fd,
+      processData: false,
+      contentType: false,
+      success: function(data, dataType){
+        fetch();
+      },
+    });
+  });
+
+  $("#table").append(tr);
   
   $.each(files, function(index, file){
     var tr = $("<tr>");
@@ -94,9 +147,29 @@ function rewrite_table(){
     tr.append($("<td>").append(a));
     tr.append($("<td>").text(filesize2str(file.filesize)));
     tr.append($("<td>").text(unixtime2str(file.last_modified)));
+    tr.append($("<td>").append(delete_button(dir+file.filename)));
 
     $("#table").append(tr);
   });
+}
+
+function fetch()
+{
+  $.getJSON(
+    'ls.php?callback=?',
+    {
+      dir:dir,
+    },
+    function(response){
+      files = _.filter(response.files, function(file){
+        return file.type === "file";
+      });
+      directories = _.filter(response.files, function(file){
+        return file.type === "directory";
+      });
+      rewrite_table();
+    }
+  )
 }
 
 $(function(){
@@ -122,22 +195,32 @@ $("#last_modified").click(function(){
   rewrite_table();
 });
 
+$("body").bind("dragover", function(){
+    return false;
+  }).bind("dragend", function(){
+    return false;
+  }).bind("drop", function(e){
+    var files = e.originalEvent.dataTransfer.files;
+    var fd = new FormData();
+    fd.append("dir", dir);
+    $.each(files, function(i, file){
+      fd.append("file"+i, file);
+    });
+    $.ajax({
+      url: "upload.php",
+      type: "POST",
+      data: fd,
+      processData: false,
+      contentType: false,
+      success: function(data, dataType){
+        fetch();
+      },
+    });
+    return false;
+});
+
 $(window).hashchange(function() {
   dir = location.hash.slice(1);
-  $.getJSON(
-    'ls.php?callback=?',
-    {
-      dir:dir,
-    },
-    function(response){
-      files = _.filter(response.files, function(file){
-        return file.type === "file";
-      });
-      directories = _.filter(response.files, function(file){
-        return file.type === "directory";
-      });
-      rewrite_table();
-    }
-  )
+  fetch();
 }).hashchange();
 });
