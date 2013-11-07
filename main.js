@@ -3,7 +3,6 @@ var files = [];
 var directories = [];
 var sort_by = "filename";
 var sort_inverse = false;
-location.hash = '#/';
 
 function delete_button(filepath)
 {
@@ -17,6 +16,7 @@ function delete_button(filepath)
       processData: false,
       contentType: false,
       success: function(data, dataType){
+        console.log(data);
         fetch();
       },
     });
@@ -39,16 +39,14 @@ function unixtime2str(unixtime)
 
 function filesize2str(filesize)
 {
-  var str;
+  var str = filesize;
 
   if(filesize >= 1024*1024*1024){
-    str = filesize/1024/1024/1024+'GB';
+    str += ' '+(filesize/1024/1024/1024).toFixed(2)+'GB';
   }else if(filesize >= 1024*1024){
-    str = filesize/1024/1024/1024+'MB';
+    str += ' '+(filesize/1024/1024).toFixed(2)+'MB';
   }else if(filesize >= 1024){
-    str = filesize/1024/1024/1024+'kB';
-  }else{
-    str = filesize+'B';
+    str += ' '+(filesize/1024).toFixed(2)+'kB';
   }
   
   return str;
@@ -107,7 +105,6 @@ function rewrite_table(){
     }else{
       tr.append($("<td>").text("-"));
     }
-
     $("#table").append(tr);
   });
 
@@ -123,9 +120,11 @@ function rewrite_table(){
   tr.append($("<td>").text("-"));
   tr.append($("<td>").text("-"));
   tr.append($("<td>").text("-"));
+  $("#table").append(tr);
+
   $('#mkdir').click(function(){
     var fd = new FormData();
-    fd.append("filepath", dir+$("#dirname"));
+    fd.append("filepath", dir+$("#dirname").val());
     $.ajax({
       url: "mkdir.php",
       type: "POST",
@@ -133,12 +132,11 @@ function rewrite_table(){
       processData: false,
       contentType: false,
       success: function(data, dataType){
+        console.log(data);
         fetch();
       },
     });
   });
-
-  $("#table").append(tr);
   
   $.each(files, function(index, file){
     var tr = $("<tr>");
@@ -148,7 +146,6 @@ function rewrite_table(){
     tr.append($("<td>").text(filesize2str(file.filesize)));
     tr.append($("<td>").text(unixtime2str(file.last_modified)));
     tr.append($("<td>").append(delete_button(dir+file.filename)));
-
     $("#table").append(tr);
   });
 }
@@ -220,6 +217,9 @@ $("body").bind("dragover", function(){
 });
 
 $(window).hashchange(function() {
+  if(location.hash == '' || location.hash == '#'){
+    location.hash = '#/';
+  }
   dir = location.hash.slice(1);
   fetch();
 }).hashchange();
