@@ -13,8 +13,11 @@ if(false === ($handle = opendir($dir))){
 }
 
 foreach($_FILES as $file){
-  echo "Error";
-  move_uploaded_file($file["tmp_name"], $dir.$file["name"]);
+  if(false === move_uploaded_file($file["tmp_name"], $dir.$file["name"])){
+    echo "Error";
+  }
+
+  echo "Success";
 }
 
 ?>

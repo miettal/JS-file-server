@@ -203,6 +203,8 @@ $("body").bind("dragover", function(){
     $.each(files, function(i, file){
       fd.append("file"+i, file);
     });
+    $("#message").show();
+    $("#message").text();
     $.ajax({
       url: "upload.php",
       type: "POST",
@@ -210,7 +212,23 @@ $("body").bind("dragover", function(){
       processData: false,
       contentType: false,
       success: function(data, dataType){
+        if($.trim(data) === "Error"){
+          $("#message").text("Error!");
+          return;
+        }
+        $("#message").hide();
         fetch();
+      },
+      xhr: function(){
+        XHR = $.ajaxSettings.xhr();
+        XHR.upload.addEventListener('progress',function(e){
+          var total = e.total || e.totalsize;
+          var done = e.position || e.loaded;
+          var parsent = done/total*100
+          
+          $("#progress-bar").css('width', parsent+"%");
+        })
+        return XHR;
       },
     });
     return false;
